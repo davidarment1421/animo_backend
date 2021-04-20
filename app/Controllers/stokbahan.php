@@ -8,8 +8,14 @@ use App\Models\stokbahanmodel;
 
 class stokbahan extends Controller
 {
+    public function __construct()
+    {
 
+        // Mendeklarasikan class ProductModel menggunakan $this->product
+        $this->product = new stokbahanmodel();
+    }
     public function index()
+
     {
 
         $model = new stokbahanmodel();
@@ -24,32 +30,45 @@ class stokbahan extends Controller
 
         echo view("stokbahan", $data);
     }
-    public function update()
+    public function edit($id)
     {
         $model = new stokbahanmodel();
-        $id = $this->request->getVar('id');
-        $data = array(
-            'id'        => $this->request->getVar('id'),
-            'stokAwal'        => $this->request->getVar('stokAwal'),
-            'stokMasuk'        => $this->request->getVar('stokMasuk'),
-            'stokKeluar'        => $this->request->getVar('stokKeluar'),
-            'updateDate'       => $this->request->getVar('updateDate'),
-
-        );
-        $model->updateBahan($data, $id);
-        return redirect()->to('http://localhost:8081/stokbahan/');
+        // Memanggil function getProduct($id) dengan parameter $id di dalam ProductModel dan menampungnya di variabel array product
+        $data['stok'] = $model->getBahan($id);
+        // Mengirim data ke dalam view
+        return view('edit', $data);
     }
-    public function save()
+    public function update($id)
     {
         $model = new stokbahanmodel();
-        $data = array(
-            'id'        => $this->request->getPost('id'),
-            'stokAwal'        => $this->request->getPost('stokAwal'),
-            'stokMasuk'        => $this->request->getPost('stokMasuk'),
-            'stokKeluar'        => $this->request->getPost('stokKeluar'),
-            'updateDate'       => $this->request->getPost('updateDate'),
-        );
-        $model->saveBahan($data);
-        return redirect()->to('http://localhost:8081/stokbahan/');
+        // Mengambil value dari form dengan method POST
+        $updateDate = $this->request->getPost('updateDate');
+        $stokAwal = $this->request->getPost('stokAwal');
+        $stokMasuk = $this->request->getPost('stokMasuk');
+        $stokKeluar = $this->request->getPost('stokKeluar');
+        $stokAkhir = $stokAwal + $stokMasuk - $stokKeluar;
+
+        // Membuat array collection yang disiapkan untuk insert ke table
+        $data = [
+            'updateDate' => $updateDate,
+            'stokAwal' => $stokAwal,
+            'stokMasuk' => $stokMasuk,
+            'stokKeluar' => $stokKeluar,
+            'stokAkhir' => $stokAkhir
+        ];
+
+        /* 
+        Membuat variabel ubah yang isinya merupakan memanggil function 
+        update_product dan membawa parameter data beserta id
+        */
+        $ubah = $model->updateBahan($data, $id);
+
+        // Jika berhasil melakukan ubah
+        if ($ubah) {
+            // Deklarasikan session flashdata dengan tipe info
+            session()->setFlashdata('info', 'Bahan berhasil di update');
+            // Redirect ke halaman product
+            return redirect()->to('http://localhost:8081/stokbahan');
+        }
     }
 }
