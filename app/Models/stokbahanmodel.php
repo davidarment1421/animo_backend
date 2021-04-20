@@ -27,13 +27,8 @@ class stokbahanmodel extends Model
     }
     public function updateBahan($data, $id)
     {
-
-        $query = $this->db->table('stok')->update($data, array('id' => $id));
-        return $query;
-    }
-    public function saveBahan($data)
-    {
-        $query = $this->db->table('stok')->insert($data);
-        return $query;
+        return $this->db->table('stok')
+            ->join('bahan', 'bahan.id=stok.idBahan')
+            ->update($data, ['id' => $id]);
     }
 }
